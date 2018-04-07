@@ -18,6 +18,7 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using JobModel.AutoFac;
 using Newtonsoft.Json.Serialization;
+using Microsoft.AspNetCore.Builder;
 
 namespace SeekAPI
 {
@@ -108,7 +109,11 @@ namespace SeekAPI
             app.UseStaticFiles();
             app.UseSwagger();
             app.UseSwaggerUI(setup => setup.SwaggerEndpoint($"/swagger/{SwaggerApiName}/swagger.json", "Job API"));
-            app.UseMvc();
+            app.UseMvc(routes =>
+            {
+                routes.MapSpaFallbackRoute("spaFallback", new { controller = "Home", action = "Spa" });
+            }
+            );
         }
     }
 }
