@@ -10,7 +10,7 @@
         "lint": "ng lint",
         "e2e": "ng e2e",
         "api": "mvcng -s \"..\\SeekAPI\\SeekAPI\" -p \"..\\SeekAPI\\SeekAPI\\SeekAPI.csproj\" -t src\\app\\services\\mvc-api -a \"SeekAPI;JobModel\" ",
-        "deploy": "node \"node_modules/nggitres/index.js\" \"dist\" \"../SeekAPI/SeekAPI/wwwroot\" \"../Versions\" \"https://raw.githubusercontent.com/JackYumCha/SeekKeywords/master/Versions\" "
+        "deploy": "node \"node_modules/nggitres/index.js\" \"dist\" \"../SeekAPI/SeekAPI/wwwroot\" \"../Versions\" \"https://rawgit.com/JackYumCha/SeekKeywords/master/Versions\" "
     },
     "private": true,
     "dependencies": {
