@@ -102,9 +102,9 @@ namespace SeekAPI
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseCors(CorsPolicy);
             }
 
-            app.UseCors(CorsPolicy);
             app.UseDefaultFiles();
             app.UseStaticFiles();
             app.UseSwagger();
@@ -112,8 +112,7 @@ namespace SeekAPI
             app.UseMvc(routes =>
             {
                 routes.MapSpaFallbackRoute("spaFallback", new { controller = "Home", action = "Spa" });
-            }
-            );
+            });
         }
     }
 }
