@@ -1,0 +1,8 @@
+<svg [attr.viewBox]="viewBox" [attr.width]="viewWidth" [attr.height]="viewHeight">
+  <g [attr.transform]="bodyOffset">
+    <g *ngFor="let entry of entries; let entryIndex = index;" [attr.transform]="entryOffset(entryIndex)">
+      <rect [attr.y]="rectTop" [attr.width]="rectWidth(entry)" [attr.height]="rectHeight" fill="#dff" stroke="#faa"></rect>
+      <text x="4" [attr.y]="textTop" alignment-baseline="middle">{{entry.key}} ({{entry.value}})</text>
+    </g>
+  </g>
+</svg>

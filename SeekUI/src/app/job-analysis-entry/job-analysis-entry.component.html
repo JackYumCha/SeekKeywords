@@ -1,0 +1,19 @@
+<h3>当前报告</h3>
+<div *ngIf="jobAnalysisEntry">
+    <ul>
+        <li>职位关键词：{{jobAnalysis.Title}}</li>
+        <li>取样日期：{{jobAnalysisEntry.AnalysisTime|date:'yyyy-MM-dd HH:mm'}}</li>
+        <li>样本总数：{{jobAnalysisEntry.TotalJobs}}</li>
+    </ul>
+    <h4>城市分析</h4>
+    <app-bar-chart [data]="jobAnalysisEntry.CityStatistics" [max]="jobAnalysisEntry.TotalJobs"></app-bar-chart>
+    <h4>类型分析</h4>
+    <app-bar-chart [data]="jobAnalysisEntry.WorkTypeStatistics" [max]="jobAnalysisEntry.TotalJobs"></app-bar-chart>
+    <h4>关键词分析</h4>
+    <app-bar-chart [data]="jobAnalysisEntry.KeywordStatistics" [max]="jobAnalysisEntry.TotalJobs"></app-bar-chart>
+</div>
+
+<h3>报告列表</h3>
+<div *ngFor="let entry of list">
+    <a routerLink="/job-analysis-entry/{{analysisKey}}/{{entry._key}}">{{entry.AnalysisTime|date:'yyyy-MM-dd HH:mm'}}</a>
+</div>

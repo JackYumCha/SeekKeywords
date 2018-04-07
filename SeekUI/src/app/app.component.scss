@@ -1,0 +1,11 @@
+:host {
+    width: 800px;
+}
+
+.main-container {
+    display: flex;
+    flex-direction: column;
+    >h1 {
+        align-self: center;
+    }
+}

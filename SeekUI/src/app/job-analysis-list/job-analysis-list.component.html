@@ -1,0 +1,6 @@
+<h2>
+    Job List:
+</h2>
+<div *ngFor="let analysis of list">
+    <a routerLink="/job-analysis-entry/{{analysis._key}}/latest">{{analysis.Title}}</a>
+</div>
