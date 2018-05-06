@@ -13,6 +13,7 @@
         "deploy": "node \"node_modules/nggitres/index.js\" \"dist\" \"../SeekAPI/SeekAPI/wwwroot\" \"../Versions\" \"https://rawgit.com/JackYumCha/SeekKeywords/master/Versions\" "
     },
     "private": true,
+    
     "dependencies": {
         "@angular/animations": "^5.2.0",
         "@angular/common": "^5.2.0",
