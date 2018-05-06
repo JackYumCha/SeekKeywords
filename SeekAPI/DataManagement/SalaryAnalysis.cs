@@ -89,18 +89,20 @@ namespace DataManagement
 
             List<Regex> rulesExact = new List<Regex>()
             {
-                new Regex(@"\$([\d,\.]+k?)\s*incl\w*\s*super", RegexOptions.IgnoreCase),
-                new Regex(@"\$([\d,\.]+k?)\s*package", RegexOptions.IgnoreCase),
-                new Regex(@"\$([\d,\.]+k?)\s*(Base|)\s*(plus|\+)\s*super", RegexOptions.IgnoreCase),
-                new Regex(@"\$([\d,\.]+k?)\s*(per|\/)\s*(day)", RegexOptions.IgnoreCase),
+                new Regex(@"\$?([\d,\.]+k?)\s*incl\w*\s*super", RegexOptions.IgnoreCase),
+                new Regex(@"\$?([\d,\.]+k?)\s*package", RegexOptions.IgnoreCase),
+                new Regex(@"\$?([\d,\.]+k?)\s*(Base|)\s*(plus|\+)\s*super", RegexOptions.IgnoreCase),
+                new Regex(@"\$?([\d,\.]+k?)\s*(per|a|\/)\s*(day)", RegexOptions.IgnoreCase),
+                new Regex(@"\$?([\d,\.]+k?)p.a", RegexOptions.IgnoreCase),
                 new Regex(@"\$([\d,\.]+k?)", RegexOptions.IgnoreCase),
             };
 
             List<Regex> rulesFromTo = new List<Regex>()
             {
-                new Regex(@"\$([\d,\.]+k?)\s*-\s*\$?([\d,\.]+k?)\s*p.a.", RegexOptions.IgnoreCase),
-                new Regex(@"\$([\d,\.]+k?)\s*-\s*\$?([\d,\.]+k?)\s*pkg", RegexOptions.IgnoreCase),
-                new Regex(@"\$([\d,\.]+k?)\s*-\s*\$?([\d,\.]+k?)\s*(per|\/)\s*(day)", RegexOptions.IgnoreCase),
+                new Regex(@"\$?([\d,\.]+k?)\s*-\s*\$?([\d,\.]+k?)\s*base", RegexOptions.IgnoreCase),
+                new Regex(@"\$?([\d,\.]+k?)\s*-\s*\$?([\d,\.]+k?)\s*p.a.", RegexOptions.IgnoreCase),
+                new Regex(@"\$?([\d,\.]+k?)\s*-\s*\$?([\d,\.]+k?)\s*pkg", RegexOptions.IgnoreCase),
+                new Regex(@"\$?([\d,\.]+k?)\s*-\s*\$?([\d,\.]+k?)\s*(per|\/)\s*(day)", RegexOptions.IgnoreCase),
                 new Regex(@"\$([\d,\.]+k?)\s*-\s*\$?([\d,\.]+k?)", RegexOptions.IgnoreCase),
             };
 
