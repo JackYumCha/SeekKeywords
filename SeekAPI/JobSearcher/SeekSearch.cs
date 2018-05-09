@@ -10,7 +10,7 @@ using ArangoDB.Client;
 using System.Web;
 using Serilog;
 using HtmlAgilityPack;
-
+using System.Threading;
 namespace JobSearcher
 {
     public class SeekSearch
@@ -51,6 +51,7 @@ namespace JobSearcher
                         catch (Exception ex)
                         {
                             _logger.Error(ex, $"search {job.Title}.  {retry} of {_searchOptions.MaxRetry} attempts.");
+                            Thread.Sleep(100);
                         }
                     }
                 }
@@ -136,6 +137,7 @@ namespace JobSearcher
                     catch (Exception ex)
                     {
                         _logger.Error(ex, $"failed to get job list elements from url {url}. {chromeRetry} of {_searchOptions.MaxRetry} attempts.");
+                        Thread.Sleep(100);
                     }
                 } while (urlNodes == null);
 
@@ -184,6 +186,7 @@ namespace JobSearcher
                     catch (Exception ex)
                     {
                         _logger.Error(ex, $"failed to access job({key}) from arango. {retry} of {_searchOptions.MaxRetry} attempts.");
+                        Thread.Sleep(100);
                     }
                 }
             }

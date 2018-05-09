@@ -28,4 +28,16 @@
     <ProjectReference Include="..\JobModel\JobModel.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="SalaryAnalysis.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="rawSalary.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

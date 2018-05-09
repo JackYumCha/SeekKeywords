@@ -1,0 +1,11 @@
+[Unit]
+Description=Seek API Web Service
+[Service]
+WorkingDirectory=/root/SeekAPI
+ExecStart=/usr/bin/dotnet /root/SeekAPI/SeekAPI.dll
+Restart=always
+RestartSec=10
+SyslogIdentifier=SeekAPI
+User=root
+[Install]
+WantedBy=multi-user.target
