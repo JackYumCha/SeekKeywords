@@ -29,7 +29,6 @@ namespace DataManagement
 
             rawSalaries = rawSalaries.Where(raw => rgxDigits.IsMatch(raw)).ToList();
 
-
             Func<string, Regex, AnnualSalary> convertExact = (string value, Regex rule) =>
             {
                 Match match = rule.Match(value);
