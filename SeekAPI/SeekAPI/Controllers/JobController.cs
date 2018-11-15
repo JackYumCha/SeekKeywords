@@ -10,6 +10,7 @@ using MvcAngular;
 
 namespace SeekAPI.Controllers
 {
+    // controller/action route is important for loading the job
     [Angular, Route("[controller]/[action]")]
     public class JobController: Controller
     {

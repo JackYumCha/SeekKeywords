@@ -7,6 +7,10 @@ namespace SeekAPI.Controllers
 {
     public class HomeController: Controller
     {
+        /// <summary>
+        /// this ensures that your SPA can load via the http services.
+        /// </summary>
+        /// <returns></returns>
         public IActionResult Spa()
         {
             return File("~/index.html", "text/html");

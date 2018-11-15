@@ -2,12 +2,10 @@
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using System.Net;
 using System.Linq;
 using JobModel.Entities;
 using JobModel.AutoFac;
 using ArangoDB.Client;
-using System.Web;
 using Serilog;
 using HtmlAgilityPack;
 using System.Threading;
@@ -61,10 +59,12 @@ namespace JobSearcher
 
         public async Task Search(JobAnalysis jobAnalysis, IArangoDatabase client, string timeStamp)
         {
+            // generate list of job URLs
             var urls = SearchJob(jobAnalysis);
 
             Dictionary<string, Job> jobs = new Dictionary<string, Job>();
 
+            // this is the entry that would be saved in the arangodb.
             JobAnalysisEntry jobAnalysisEntry = new JobAnalysisEntry()
             {
                 _key = $"{jobAnalysis._key}__{timeStamp}",
@@ -74,6 +74,7 @@ namespace JobSearcher
             };
 
             int urlIndex = 0;
+
             // download jobs and add edge to entry
             foreach (var url in urls)
             {
@@ -82,9 +83,12 @@ namespace JobSearcher
                 await DownloadJob(url, jobAnalysisEntry, client, jobs);
             }
 
+            // analyze jobs
             AnalyzeJobs(jobAnalysis, jobAnalysisEntry, jobs);
 
+            // upsert the job analysis entry
             client.UpsertIgnoreNull(jobAnalysisEntry);
+
 
             client.UpsertEdge<EntryOf, JobAnalysisEntry, JobAnalysis>(jobAnalysisEntry, jobAnalysis);
 
@@ -128,7 +132,7 @@ namespace JobSearcher
                     {
                         chromeRetry++;
 
-                        document = WebExtensions.LoadPage(url);
+                        document = url.LoadHtmlDocumentForUrl();
                         urlNodes = document.DocumentNode.DescendantsAndSelf()
                             .Where(n =>
                                 n.Name.ToLower() == "a" &&
@@ -219,7 +223,7 @@ namespace JobSearcher
                             {
                                 chromeRetry++;
 
-                                document = WebExtensions.LoadPage(url);
+                                document = url.LoadHtmlDocumentForUrl();
 
                                 HtmlNode jobBox = document.DocumentNode.DescendantsAndSelf()
                                     .Where(n => n.Name.ToLower() == "div" && n.GetAttributeValue("data-automation", null) == "jobDescription")
@@ -386,38 +390,6 @@ namespace JobSearcher
                     jobAnalysisEntry.WorkTypeStatistics.Add(job.WorkType, 1);
                 }
             }
-        }
-    }
-
-    class StringComparer : IEqualityComparer<string>
-    {
-        public bool Equals(string x, string y)
-        {
-            return string.Compare(x, y, true) == 0;
-        }
-
-        public int GetHashCode(string obj)
-        {
-            return obj.ToLower().GetHashCode();
-        }
-    }
-
-    static class WebExtensions
-    {
-        public  static HtmlDocument LoadPage(string url)
-        {
-            using (WebClient client = new WebClient())
-            {
-                string html = client.DownloadString(new Uri(url));
-                HtmlDocument htmlDocument = new HtmlDocument();
-                htmlDocument.LoadHtml(html);
-                return htmlDocument;
-            }
-        }
-
-        public static string HtmlDecode(this string value)
-        {
-            return WebUtility.HtmlDecode(value);
         }
     }
 }

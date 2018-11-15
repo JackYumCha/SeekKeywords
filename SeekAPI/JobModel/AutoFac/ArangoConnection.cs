@@ -16,7 +16,7 @@ namespace JobModel.AutoFac
         {
 
             // read arango setting from arango.json
-            //string arangoSettingFilename = $"{AppContext.BaseDirectory}/arango.setting";
+            // string arangoSettingFilename = $"{AppContext.BaseDirectory}/arango.setting";
 
             //var arangoSetting = JsonConvert.DeserializeObject<ArangoOptions>(File.ReadAllText(arangoSettingFilename));
 
