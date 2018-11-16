@@ -20,13 +20,25 @@ namespace JobSearcher
 
         private Regex jobLink = new Regex(@"https:\/\/www\.seek\.com\.au\/job\/(\d+)");
 
+        /// <summary>
+        /// in this version, we don't use chrome driver
+        /// this will seach the web via the htmlAgilityPack
+        /// </summary>
+        /// <param name="arangoConnection"></param>
+        /// <param name="searchOptions"></param>
+        /// <param name="logger"></param>
         public SeekSearch(ArangoConnection arangoConnection, SearchOptions searchOptions, ILogger logger) // ChromeDriver chromeDriver, 
         {
+            // keep local references for the injected dependencies
             _arangoConnection = arangoConnection;
             _searchOptions = searchOptions;
             _logger = logger;
         }
 
+        /// <summary>
+        /// the main entry: search all analysis that defined in the arango database
+        /// </summary>
+        /// <returns></returns>
         public async Task SearchAllAnalysis()
         {
             string timeStamp = DateTime.Now.ToString("yyyyMMddHHmmss");
@@ -57,6 +69,13 @@ namespace JobSearcher
             }
         }
 
+        /// <summary>
+        /// search for a specific job
+        /// </summary>
+        /// <param name="jobAnalysis"></param>
+        /// <param name="client"></param>
+        /// <param name="timeStamp"></param>
+        /// <returns></returns>
         public async Task Search(JobAnalysis jobAnalysis, IArangoDatabase client, string timeStamp)
         {
             // generate list of job URLs
@@ -100,11 +119,16 @@ namespace JobSearcher
             }
         }
 
-        public List<string> SearchJob(JobAnalysis jobAnalysis)
+        /// <summary>
+        /// search job for the URLs, so that crawler can iterate each of the link
+        /// </summary>
+        /// <param name="jobAnalysis"></param>
+        /// <returns></returns>
+        public HashSet<string> SearchJob(JobAnalysis jobAnalysis)
         {
             _logger.Information($"Search Job: {jobAnalysis.Title}");
 
-            List<string> urls = new List<string>();
+            HashSet<string> urls = new HashSet<string>();
 
             string keyWords = jobAnalysis.Title;
 
@@ -151,7 +175,16 @@ namespace JobSearcher
                 {
                     var href = urlNode.GetAttributeValue("href", null);
                     if(href != null)
-                        urls.Add($@"https://www.seek.com.au{href}");
+                    {
+                        var url = $@"https://www.seek.com.au{href}";
+                        var indexQuery = url.IndexOf("?");
+                        if ( indexQuery> -1)
+                        {
+                            url = url.Substring(0, indexQuery);
+                        }
+                        urls.Add(url);
+                    }
+                        
                 }
            
                 index++;
@@ -161,42 +194,49 @@ namespace JobSearcher
             return urls;
         }
 
+
+        /// <summary>
+        /// download a job and insert into the dictionary.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="jobAnalysisEntry"></param>
+        /// <param name="client">this method queries the database to find out which of the jobs have been downloaded</param>
+        /// <param name="jobs"></param>
+        /// <returns></returns>
         public async Task DownloadJob(string url, JobAnalysisEntry jobAnalysisEntry, IArangoDatabase client, Dictionary<string, Job> jobs)
         {
-            
-
             var match = jobLink.Match(url);
             var key = match.Groups[1].Value;
 
             // if job has been saved in database, don't do it again.
-            bool exists = false;
-            {
-                bool success = false;
-                int retry = 0;
-                while (!success && retry < _searchOptions.MaxRetry)
-                {
-                    try
-                    {
-                        retry++;
-                        var jobsFound = await client.Query<Job>().Filter(j => j._key == key).ToListAsync();
-                        var first = jobsFound.FirstOrDefault();
-                        if (first != null && first.Description != null && first.Description != "")
-                        {
-                            jobs.Add(first._key, first);
-                            exists = true;
-                        }
-                        success = true;
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.Error(ex, $"failed to access job({key}) from arango. {retry} of {_searchOptions.MaxRetry} attempts.");
-                        Thread.Sleep(100);
-                    }
-                }
-            }
+            //bool exists = false;
+            //{
+            //    bool success = false;
+            //    int retry = 0;
+            //    while (!success && retry < _searchOptions.MaxRetry)
+            //    {
+            //        try
+            //        {
+            //            retry++;
+            //            var jobsFound = await client.Query<Job>().Filter(j => j._key == key).ToListAsync();
+            //            var first = jobsFound.FirstOrDefault();
+            //            if (first != null && first.Description != null && first.Description != "")
+            //            {
+            //                jobs.Add(first._key, first);
+            //                exists = true;
+            //            }
+            //            success = true;
+            //        }
+            //        catch (Exception ex)
+            //        {
+            //            _logger.Error(ex, $"failed to access job({key}) from arango. {retry} of {_searchOptions.MaxRetry} attempts.");
+            //            Thread.Sleep(100);
+            //        }
+            //    }
+            //}
 
-            if (!exists)
-            {
+            //if (!exists)
+            //{
                 bool success = false;
                 int retry = 0;
 
@@ -225,14 +265,23 @@ namespace JobSearcher
 
                                 document = url.LoadHtmlDocumentForUrl();
 
+                                // the following code heavily depends on the UI design of seek
+                                // if seek changed UI, the following code could fail
                                 HtmlNode jobBox = document.DocumentNode.DescendantsAndSelf()
                                     .Where(n => n.Name.ToLower() == "div" && n.GetAttributeValue("data-automation", null) == "jobDescription")
                                     .FirstOrDefault();
                                 jobDescription = jobBox.DescendantsAndSelf()
-                                    .Where(n => n.Name.ToLower() == "div" && n.HasClass("templatetext")).FirstOrDefault();
+                                    .Where(n => n.Name.ToLower() == "div" && (n.HasClass("templatetext") || n.GetAttributeValue("data-automation", null) == "mobileTemplate")).FirstOrDefault();
 
                                 jobTitle = jobBox.DescendantsAndSelf()
                                     .Where(n => n.HasClass("jobtitle")).FirstOrDefault();
+
+                                if(jobTitle == null)
+                                {
+                                    jobTitle = document.DocumentNode.Descendants()
+                                        .Where(n => n.GetAttributeValue("data-automation", null) == "job-detail-title")
+                                        .FirstOrDefault();
+                                }
 
                                 HtmlNode infoHeader = document.DocumentNode.DescendantsAndSelf()
                                     .Where(n => n.Name.ToLower() == "section" && n.GetAttributeValue("aria-labelledby", null) == "jobInfoHeader")
@@ -335,9 +384,15 @@ namespace JobSearcher
                         Thread.Sleep(100);
                     }
                 }
-            }
+            // }
         }
 
+        /// <summary>
+        /// analyze job for statistics, those will be stored in the database
+        /// </summary>
+        /// <param name="jobAnalysis"></param>
+        /// <param name="jobAnalysisEntry"></param>
+        /// <param name="jobs"></param>
         public void AnalyzeJobs(JobAnalysis jobAnalysis, JobAnalysisEntry jobAnalysisEntry, Dictionary<string, Job> jobs)
         {
             _logger.Information($"Analyzing Jobs for {jobAnalysis.Title} Entry: {jobAnalysisEntry._key}");
@@ -355,7 +410,6 @@ namespace JobSearcher
 
                 foreach (string keyword in words)
                 {
-                    words.Add(keyword);
                     jobAnalysisEntry.KeywordStatistics.Add(keyword, 
                         jobs.Values.Count(j =>
                         Regex.IsMatch(j.Description, $@"(^|\W){keyword}(\W|$)", RegexOptions.IgnoreCase)

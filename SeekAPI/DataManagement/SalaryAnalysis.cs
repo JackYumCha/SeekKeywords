@@ -32,7 +32,8 @@ namespace DataManagement
             Func<string, Regex, AnnualSalary> convertExact = (string value, Regex rule) =>
             {
                 Match match = rule.Match(value);
-                if (match.Success)
+                double test;
+                if (match.Success && double.TryParse(match.Groups[1].Value, out test))
                 {
                     bool isDaily = match.Groups.Skip(2).Any(g => g.Value.ToLower() == "day");
                     bool hasK = false;
@@ -56,7 +57,10 @@ namespace DataManagement
             Func<string, Regex, AnnualSalary> convertFromTo = (string value, Regex rule) =>
             {
                 Match match = rule.Match(value);
-                if (match.Success)
+                double testFrom, testTo;
+
+                if (match.Success && double.TryParse(match.Groups[1].Value, out testFrom) &&
+                double.TryParse(match.Groups[2].Value, out testTo))
                 {
                     bool hasKFrom = false, hasKTo = false;
 
